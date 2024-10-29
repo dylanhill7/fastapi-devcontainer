@@ -2,7 +2,7 @@
 
 The "terminal" of VS Code natively offers the user a command-line to her/his local environment, invoking `bash`, `zsh`, Windows PowerShell, Windows CMD, etc. This can be customized in a variety of ways, for example Windows users running WSL can use that terminal within VS Code, along with PowerShell or the Windows CMD.
 
-The challenge for data scientists is 
+The challenge for data scientists is creating and managing project environments without too much complexity or overhead.
 
 Devcontainers provide a method for consistent local terminals by containerizing the interactive terminal. This means all students have the same software, the same environment configuration, and the same paths to their work.
 

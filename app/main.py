@@ -1,37 +1,54 @@
 #!/usr/bin/env python3
 
-from fastapi import Request, FastAPI
+from fastapi import FastAPI
 from typing import Optional
 from pydantic import BaseModel
-import pandas as pd
 import json
 import os
+import mysql.connector
+from mysql.connector import Error
 
-api = FastAPI()
+app = FastAPI()
+from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@api.get("/")  # zone apex
-def zone_apex():
-    return {"Hello": "Hello API"}
+DBHOST = "ds2022.cqee4iwdcaph.us-east-1.rds.amazonaws.com"
+DBUSER = "admin"
+DBPASS = "D$2022pAss"
+DB = "mce8ep"
 
-@api.get("/add/{a}/{b}")
-def add(a: int, b: int):
-    return {"sum": a + b}
+db = mysql.connector.connect(user=DBUSER, host=DBHOST, password=DBPASS, database=DB)
+cur=db.cursor()
 
-@api.get("/customer/{idx}")
-def get_customer(idx: int):
-    # Read the data from the CSV file
-    df = pd.read_csv("../customers.csv")
-    # Filter the data based on the index
-    customer = df.iloc[idx]
-    return customer.to_dict()
+@app.get('/genres')
+def get_genres():
+    query = "SELECT * FROM genres ORDER BY genreid;"
+    try:    
+        cur.execute(query)
+        headers=[x[0] for x in cur.description]
+        results = cur.fetchall()
+        json_data=[]
+        for result in results:
+            json_data.append(dict(zip(headers,result)))
+        return(json_data)
+    except Error as e:
+        return {"Error": "MySQL Error: " + str(e)}
 
-@api.post("/get_body")
-async def get_body(request: Request):
-    return await request.json()
-
-@api.post("/mapit")
-async def map_request(request: Request):
-    response = await request.json()
-    geo = response.get("geo")
-    url = "https://maps.google.com/?q={geo}".format(geo=geo)
-    return {"gmaps_url": url}
+@app.get('/songs')
+def get_songs():
+    query = "SELECT songs.title, songs.album, songs.artist, songs.year, songs.file, songs.image, genres.genre FROM songs JOIN genres ON songs.genre=genres.genreid"
+    try:
+        cur.execute(query)
+        headers=[x[0] for x in cur.description]
+        results = cur.fetchall()
+        json_data=[]
+        for result in results:
+            json_data.append(dict(zip(headers,result)))
+        return(json_data)
+    except Error as e:
+        return {"Error": "MySQL Error: " + str(e)}

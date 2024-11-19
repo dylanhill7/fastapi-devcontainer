@@ -19,7 +19,7 @@ app.add_middleware(
 
 DBHOST = "ds2022.cqee4iwdcaph.us-east-1.rds.amazonaws.com"
 DBUSER = "admin"
-DBPASS = "D$2022pAss"
+DBPASS = os.getenv('DBPASS')
 DB = "mce8ep"
 
 db = mysql.connector.connect(user=DBUSER, host=DBHOST, password=DBPASS, database=DB)
